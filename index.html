@@ -1,0 +1,280 @@
+<!-- index.html -->
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Template Movie Grid — Inspired</title>
+  <meta name="description" content="Template tampilan grid film/serial, navbar kategori, modal trailer." />
+  <style>
+    /* Simple modern reset & utility */
+    :root{
+      --bg:#0f1724; --card:#0b1220; --muted:#94a3b8; --accent:#ff6b6b;
+      --glass: rgba(255,255,255,0.03);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background: linear-gradient(180deg,#071021 0%, #081426 100%);
+      color:#e6eef8;
+      -webkit-font-smoothing:antialiased;
+      padding:24px;
+      line-height:1.4;
+    }
+
+    /* Navbar */
+    .navbar{
+      display:flex; align-items:center; gap:16px;
+      margin-bottom:20px;
+    }
+    .brand{font-weight:700; letter-spacing:0.6px; font-size:1.15rem}
+    .navlinks{display:flex; gap:10px; margin-left:8px; flex-wrap:wrap}
+    .navlinks button{
+      background:transparent; border:1px solid transparent; color:var(--muted); padding:6px 10px; border-radius:8px; cursor:pointer;
+    }
+    .navlinks button.active{ color:#fff; border-color:rgba(255,255,255,0.06); background:var(--glass) }
+
+    /* Controls */
+    .controls{display:flex; gap:12px; margin:18px 0; align-items:center; flex-wrap:wrap}
+    .search{
+      display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.03); padding:8px 10px; border-radius:10px; min-width:220px;
+    }
+    .search input{background:transparent;border:0;outline:0;color:inherit;font-size:0.95rem;width:160px}
+
+    select, .btn{
+      background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.03);
+      color:inherit; padding:8px 12px; border-radius:10px; cursor:pointer;
+    }
+    .btn.primary{background:linear-gradient(90deg,var(--accent),#ff9a9a); color:#081426; font-weight:600}
+
+    /* Grid */
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px,1fr));
+      gap:14px;
+    }
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:12px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,0.03);
+      transition:transform .14s ease, box-shadow .14s ease;
+    }
+    .card:hover{ transform:translateY(-6px); box-shadow:0 8px 30px rgba(2,6,23,0.6) }
+    .poster{height:260px; background-size:cover; background-position:center}
+    .card-body{padding:10px}
+    .title{font-weight:700; font-size:0.95rem; margin-bottom:6px}
+    .meta{font-size:0.82rem; color:var(--muted); display:flex; justify-content:space-between; align-items:center}
+    .actions{display:flex; gap:8px; margin-top:10px}
+    .chip{padding:6px 8px; border-radius:8px; font-size:0.82rem; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.02)}
+
+    /* Pagination */
+    .pagination{display:flex; gap:8px; justify-content:center; margin-top:20px}
+
+    /* Modal */
+    .modal-backdrop{
+      position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(2,6,23,0.7); z-index:50;
+    }
+    .modal{width:90%; max-width:900px; background:#071025; border-radius:10px; padding:12px; border:1px solid rgba(255,255,255,0.04)}
+    .close{float:right; cursor:pointer; font-weight:700; padding:6px 10px}
+    iframe{width:100%; height:500px; border-radius:6px; border:0}
+
+    /* Responsive tweaks */
+    @media (max-width:600px){
+      .poster{height:200px}
+      .search input{width:90px}
+      iframe{height:260px}
+    }
+  </style>
+</head>
+<body>
+
+  <header class="navbar">
+    <div class="brand">MyStream</div>
+    <nav class="navlinks" id="categoryBar">
+      <!-- categories injected by JS -->
+    </nav>
+
+    <div style="margin-left:auto; display:flex; gap:8px; align-items:center">
+      <div class="search">
+        🔍 <input id="q" placeholder="Cari title, genre..." />
+      </div>
+      <select id="yearFilter">
+        <option value="">All years</option>
+      </select>
+      <button class="btn primary" id="refreshBtn">Refresh</button>
+    </div>
+  </header>
+
+  <section class="controls">
+    <div style="color:var(--muted)">Tampilan: <span id="totalCount">0</span> items</div>
+  </section>
+
+  <main>
+    <div class="grid" id="grid"></div>
+
+    <div class="pagination" id="pagination"></div>
+  </main>
+
+  <!-- Modal for trailer -->
+  <div class="modal-backdrop" id="modal">
+    <div class="modal" role="dialog" aria-modal="true">
+      <div><button class="close" id="closeModal">✖</button></div>
+      <div id="modalContent">
+        <!-- iframe inserted here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // SAMPLE DATA: replace with your backend data or CMS feed
+    const ITEMS = [];
+    const genres = ["Action","Comedy","Drama","Anime","Sci-Fi","Thriller","Romance"];
+    const years = [2025,2024,2023,2022,2021,2020];
+
+    // Create sample items (you'll replace this with real data)
+    for(let i=1;i<=36;i++){
+      ITEMS.push({
+        id:i,
+        title: "Contoh Film "+i,
+        rating: (Math.random()*3+6).toFixed(2),
+        year: years[Math.floor(Math.random()*years.length)],
+        genre: genres[Math.floor(Math.random()*genres.length)],
+        poster: "https://picsum.photos/seed/movie"+i+"/600/900",
+        trailer: "https://www.youtube.com/embed/dQw4w9WgXcQ" // placeholder
+      });
+    }
+
+    // State
+    let state = {q:"", genre:"", year:"", page:1, perPage:12};
+
+    // DOM refs
+    const grid = document.getElementById('grid');
+    const qEl = document.getElementById('q');
+    const yearFilter = document.getElementById('yearFilter');
+    const categoryBar = document.getElementById('categoryBar');
+    const totalCount = document.getElementById('totalCount');
+    const pagination = document.getElementById('pagination');
+    const modal = document.getElementById('modal');
+    const modalContent = document.getElementById('modalContent');
+    const closeModal = document.getElementById('closeModal');
+    const refreshBtn = document.getElementById('refreshBtn');
+
+    // init
+    function init(){
+      renderCategories();
+      populateYearFilter();
+      attachEvents();
+      render();
+    }
+
+    function renderCategories(){
+      const allBtn = document.createElement('button');
+      allBtn.textContent = "All";
+      allBtn.classList.add('active');
+      allBtn.onclick = ()=>{ state.genre=""; state.page=1; updateActive(); render(); };
+      categoryBar.appendChild(allBtn);
+      genres.forEach(g=>{
+        const btn=document.createElement('button');
+        btn.textContent=g;
+        btn.onclick = ()=>{ state.genre=g; state.page=1; updateActive(); render(); };
+        categoryBar.appendChild(btn);
+      });
+    }
+
+    function updateActive(){
+      Array.from(categoryBar.children).forEach(b=>{
+        b.classList.toggle('active', b.textContent===state.genre || (state.genre==="" && b.textContent==="All"));
+      });
+    }
+
+    function populateYearFilter(){
+      const yrs = Array.from(new Set(ITEMS.map(i=>i.year))).sort((a,b)=>b-a);
+      yrs.forEach(y=>{
+        const opt = document.createElement('option');
+        opt.value = y; opt.textContent = y;
+        yearFilter.appendChild(opt);
+      });
+    }
+
+    function attachEvents(){
+      qEl.addEventListener('input', e=>{ state.q=e.target.value; state.page=1; render(); });
+      yearFilter.addEventListener('change', e=>{ state.year=e.target.value; state.page=1; render(); });
+      closeModal.addEventListener('click', ()=>{ modal.style.display='none'; modalContent.innerHTML=''; });
+      refreshBtn.addEventListener('click', ()=>{ render(); });
+      modal.addEventListener('click', (e)=>{ if(e.target===modal) { modal.style.display='none'; modalContent.innerHTML=''; }});
+    }
+
+    function filterItems(){
+      return ITEMS.filter(it=>{
+        if(state.genre && it.genre!==state.genre) return false;
+        if(state.year && String(it.year)!==String(state.year)) return false;
+        if(state.q){
+          const q=state.q.toLowerCase();
+          if(!(it.title.toLowerCase().includes(q) || it.genre.toLowerCase().includes(q) || String(it.year).includes(q))) return false;
+        }
+        return true;
+      });
+    }
+
+    function render(){
+      const filtered = filterItems();
+      totalCount.textContent = filtered.length;
+      const start = (state.page-1)*state.perPage;
+      const pageItems = filtered.slice(start, start+state.perPage);
+
+      // grid
+      grid.innerHTML = "";
+      pageItems.forEach(it=>{
+        const card = document.createElement('article'); card.className='card';
+        card.innerHTML = `
+          <div class="poster" style="background-image:url('${it.poster}')"></div>
+          <div class="card-body">
+            <div class="title">${escapeHtml(it.title)}</div>
+            <div class="meta"><span class="chip">${it.genre}</span><span>${it.year} • ⭐ ${it.rating}</span></div>
+            <div class="actions">
+              <button class="btn" onclick="openTrailer('${it.trailer}')">Trailer</button>
+              <button class="btn primary" onclick="viewDetail(${it.id})">Tonton</button>
+            </div>
+          </div>`;
+        grid.appendChild(card);
+      });
+
+      renderPagination(filtered.length);
+    }
+
+    function renderPagination(total){
+      pagination.innerHTML = "";
+      const pages = Math.max(1, Math.ceil(total/state.perPage));
+      for(let p=1;p<=pages;p++){
+        const b = document.createElement('button');
+        b.className='btn'; b.textContent=p;
+        if(p===state.page) b.style.fontWeight='700';
+        b.onclick = ()=>{ state.page=p; render(); };
+        pagination.appendChild(b);
+      }
+    }
+
+    function openTrailer(url){
+      modalContent.innerHTML = `<iframe src="${url}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+      modal.style.display = 'flex';
+    }
+
+    function viewDetail(id){
+      // placeholder: in real app navigate to /detail/{id}
+      alert("Buka halaman detail untuk item ID: " + id);
+    }
+
+    // small html-escape helper
+    function escapeHtml(s){ return String(s).replace(/[&<>"']/g, ch=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[ch]); }
+
+    // expose for inline onclicks
+    window.openTrailer = openTrailer;
+    window.viewDetail = viewDetail;
+
+    init();
+  </script>
+</body>
+</html>
