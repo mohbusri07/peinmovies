@@ -1,0 +1,103 @@
+body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background: #0D0D0D;
+    color: white;
+}
+
+/* HEADER */
+.topbar {
+    height: 60px;
+    background: #000;
+    border-bottom: 1px solid #222;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+}
+
+.logo {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.menu a {
+    color: #ccc;
+    margin-left: 20px;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.menu a:hover {
+    color: white;
+}
+
+/* SIDEBAR */
+.sidebar {
+    width: 220px;
+    background: #111;
+    height: calc(100vh - 60px);
+    position: fixed;
+    top: 60px;
+    left: 0;
+    padding: 20px;
+    overflow-y: auto;
+    border-right: 1px solid #222;
+}
+
+.sidebar h3 {
+    font-size: 14px;
+    color: #888;
+    margin-bottom: 10px;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar li {
+    padding: 8px 0;
+    font-size: 14px;
+    color: #ccc;
+    cursor: pointer;
+}
+
+.sidebar li:hover {
+    color: #fff;
+}
+
+/* CONTENT */
+.content {
+    margin-left: 240px;
+    padding: 20px;
+}
+
+.content h2 {
+    margin-bottom: 20px;
+}
+
+/* GRID FILM MIRIP */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 20px;
+}
+
+.card img {
+    width: 100%;
+    aspect-ratio: 2/3;
+    border-radius: 6px;
+    object-fit: cover;
+    transition: transform .2s;
+}
+
+.card img:hover {
+    transform: scale(1.05);
+}
+
+.card p {
+    font-size: 14px;
+    margin-top: 6px;
+    color: #ddd;
+}
