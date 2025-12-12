@@ -13,7 +13,7 @@ export default function Header() {
             <div className="logo flex-shrink-0 w-full md:w-auto flex justify-center md:justify-start">
               <Link href="/" className="block hover:opacity-90 transition-opacity">
                 <Image
-                  src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/6e2baef0-07da-43b5-8f42-9fc54d73f245-javsubidn-tv/assets/images/JAvsubIDN-1-1.png"
+                  src="/assets/images/JAvsubIDN-1-1.png"
                   alt="JAV SUB INDO"
                   width={293}
                   height={66}
