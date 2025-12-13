@@ -1,10 +1,16 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { VisualEditsMessenger } from "orchids-visual-edits";
 
+const inter = Inter({
+  variable: "--font-sans",
+  subsets: ["latin"],
+});
+
 export const metadata: Metadata = {
-  title: "JAV Sub Indo - Video Streaming",
-  description: "Video streaming platform",
+  title: "Yurinime - Streaming Anime Sub Indo",
+  description: "Streaming anime sub indo terlengkap",
 };
 
 export default function RootLayout({
@@ -13,8 +19,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className="antialiased bg-[#1a1a1a]">
+    <html lang="id">
+      <body className={`${inter.variable} antialiased`}>
         {children}
         <VisualEditsMessenger />
       </body>
